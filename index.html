@@ -531,7 +531,7 @@
     <p class="tag">Saudi eLeague Mini Challenge</p>
     <div class="rules">
       A stopwatch ticks up from <b>0.00</b>.<br>
-      A random second is the winning one — the display flashes <b>green</b> for half a second (e.g. <b>6.00 → 6.50</b>).<br>
+      A random second is the winning one — the display flashes <b>green</b> for a short window starting at that second (e.g. <b>6.00 → ~6.35</b>).<br>
       Hit <b>SPACE</b> anywhere inside the green second. <span class="x">Do NOT</span> press on white.<br>
       Five rounds. Fastest reaction wins.
     </div>
@@ -548,11 +548,12 @@
   const BOLT_GREEN = '#00f5a0';
   const DECOY_COLOR = '#ffffff';       // single, stable color for every non-target frame
 
-  // Stopwatch range. The green window is half a second wide —
-  // e.g. target second 6 means the display stays green from 6.00 → 6.50.
+  // Stopwatch range. The green window opens at a whole second (e.g. 6.00) and
+  // closes 350ms later. Tight enough to require reaction, but the user can watch
+  // the seconds tick up and mentally prepare.
   const TARGET_MIN_SEC = 2;            // earliest second the green can start
   const TARGET_MAX_SEC = 13;           // latest second the green can start
-  const GREEN_WINDOW_MS = 500;         // half a second wide
+  const GREEN_WINDOW_MS = 350;         // green is visible for 0.35s
 
   const $number = document.getElementById('number');
   const $segTens  = document.getElementById('seg-tens');
@@ -642,7 +643,7 @@
 
   function startRound() {
     // Pick a random integer second. The display turns green at N.00 and
-    // stays green for half a second (N.00 → N.50).
+    // stays green for GREEN_WINDOW_MS (e.g. 6.00 → ~6.35).
     targetMs = randInt(TARGET_MIN_SEC, TARGET_MAX_SEC) * 1000;
     roundStartAt = performance.now();
     state = 'running';
