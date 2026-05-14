@@ -531,8 +531,8 @@
     <p class="tag">Saudi eLeague Mini Challenge</p>
     <div class="rules">
       A stopwatch ticks up from <b>0.00</b>.<br>
-      At a random moment the display flashes <b>green</b> — hit <b>SPACE</b> the instant it does.<br>
-      <span class="x">Do NOT</span> press on any other color.<br>
+      A random <b>second</b> is the winning one — the display stays <b>green</b> for that whole second (e.g. <b>6.00 → 7.00</b>).<br>
+      Hit <b>SPACE</b> anywhere inside the green second. <span class="x">Do NOT</span> press on white.<br>
       Five rounds. Fastest reaction wins.
     </div>
     <button class="btn" id="start-btn">START</button>
@@ -548,11 +548,11 @@
   const BOLT_GREEN = '#00f5a0';
   const DECOY_COLOR = '#ffffff';       // single, stable color for every non-target frame
 
-  // Stopwatch range. The counter runs from 0.00 and the green moment
-  // is randomized to land somewhere between MIN_MS and MAX_MS.
-  const TARGET_MIN_MS = 1500;          // earliest the green can appear
-  const TARGET_MAX_MS = 14000;         // latest the green can appear
-  const GREEN_WINDOW_MS = 280;         // how long the green stays on screen
+  // Stopwatch range. The green window is a full integer second wide —
+  // e.g. target second 6 means the display stays green for the entire 6.xx range.
+  const TARGET_MIN_SEC = 2;            // earliest second the green can start
+  const TARGET_MAX_SEC = 13;           // latest second the green can start
+  const GREEN_WINDOW_MS = 1000;        // exactly one second wide
 
   const $number = document.getElementById('number');
   const $segTens  = document.getElementById('seg-tens');
@@ -641,8 +641,9 @@
   }
 
   function startRound() {
-    // Random fractional target somewhere in the range — e.g. 3.23 or 5.52.
-    targetMs = Math.floor(rand(TARGET_MIN_MS, TARGET_MAX_MS));
+    // Pick a random integer second. The display turns green at N.00 and
+    // stays green for the entire 1-second window (N.00 → (N+1).00).
+    targetMs = randInt(TARGET_MIN_SEC, TARGET_MAX_SEC) * 1000;
     roundStartAt = performance.now();
     state = 'running';
     acceptingInput = true;
