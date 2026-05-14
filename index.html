@@ -148,6 +148,7 @@
   .arena {
     display: grid; place-items: center;
     position: relative;
+    cursor: pointer;
   }
   .reticle {
     position: absolute;
@@ -512,7 +513,7 @@
     <div class="number" id="number"><span class="slot" id="seg-tens"></span><span class="slot" id="seg-ones">0</span><span class="slot dot">.</span><span class="slot" id="seg-deca">0</span><span class="slot" id="seg-centi">0</span></div>
     <div class="toast" id="toast"></div>
     <div class="prompt" id="prompt">
-      <div class="key">PRESS SPACE</div>
+      <div class="key">PRESS SPACE OR CLICK</div>
       <div class="hint">only when the number turns <b>green</b></div>
     </div>
   </main>
@@ -532,7 +533,7 @@
     <div class="rules">
       A stopwatch ticks up from <b>0.00</b>.<br>
       A random second is the winning one — the display flashes <b>green</b> for a short window starting at that second (e.g. <b>6.00 → ~6.35</b>).<br>
-      Hit <b>SPACE</b> anywhere inside the green second. <span class="x">Do NOT</span> press on white.<br>
+      Hit <b>SPACE</b> or <b>CLICK</b> anywhere on the screen during the green window. <span class="x">Do NOT</span> press on white.<br>
       Five rounds. Fastest reaction wins.
     </div>
     <button class="btn" id="start-btn">START</button>
@@ -771,6 +772,14 @@
   });
 
   $startBtn.addEventListener('click', startGame);
+
+  // Allow mouse click to count as a "press" during active gameplay.
+  // Listening on the arena (not the document) so clicks on overlay buttons
+  // — START, PLAY AGAIN — don't double-fire as a false-start.
+  document.getElementById('arena').addEventListener('click', () => {
+    if (state === 'idle' || state === 'done') return;
+    handleSpace();
+  });
 
   // Initial stats
   updateStats();
