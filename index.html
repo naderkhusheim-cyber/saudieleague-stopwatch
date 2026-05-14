@@ -183,6 +183,10 @@
     vertical-align: baseline;
   }
   .number .slot.dot { width: 0.5em; }
+  /* When the leading "tens" digit is empty (seconds < 10), add matching
+     padding on the right so the visible digits stay centered inside the
+     reticle instead of drifting right. */
+  .number.no-tens { padding-right: 0.7em; }
   .number.pop { transform: scale(1.04); }
 
   .prompt {
@@ -588,10 +592,12 @@
     const hundredths = Math.floor(ms / 10);
     const seconds = Math.floor(hundredths / 100);
     const centi = hundredths % 100;
-    $segTens.textContent  = seconds >= 10 ? String(Math.floor(seconds / 10)) : '';
+    const showTens = seconds >= 10;
+    $segTens.textContent  = showTens ? String(Math.floor(seconds / 10)) : '';
     $segOnes.textContent  = String(seconds % 10);
     $segDeca.textContent  = String(Math.floor(centi / 10));
     $segCenti.textContent = String(centi % 10);
+    $number.classList.toggle('no-tens', !showTens);
   }
 
   function setNumberColor(color) {
