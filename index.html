@@ -630,6 +630,7 @@
 
   // ---- Game loop ----
   function startGame() {
+    clearTimers();                     // cancel any pending tick if double-fired
     round = 0;
     times = [];
     updateStats();
@@ -752,10 +753,7 @@
       <div class="hint">or press Space</div>
     `;
     $overlay.classList.remove('hidden');
-    document.getElementById('restart-btn').addEventListener('click', () => {
-      // reset panel HTML to start state on next overlay show — easier to just restart immediately
-      startGame();
-    });
+    // No need for a dedicated PLAY AGAIN handler — the overlay-wide click below catches it.
   }
 
   // ---- Input ----
@@ -777,11 +775,14 @@
     handleSpace();
   });
 
-  $startBtn.addEventListener('click', startGame);
+  // Click anywhere on the start / end overlay to begin or restart.
+  // The START and PLAY AGAIN buttons are now just visual affordances — their
+  // clicks bubble up and hit this handler.
+  $overlay.addEventListener('click', () => {
+    if (state === 'idle' || state === 'done') startGame();
+  });
 
-  // Allow mouse click to count as a "press" during active gameplay.
-  // Listening on the arena (not the document) so clicks on overlay buttons
-  // — START, PLAY AGAIN — don't double-fire as a false-start.
+  // Click anywhere in the arena to count as a press during active gameplay.
   document.getElementById('arena').addEventListener('click', () => {
     if (state === 'idle' || state === 'done') return;
     handleSpace();
