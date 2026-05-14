@@ -1,0 +1,778 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>Saudi eLeague · Reaction Bolt</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bolt: #00f5a0;
+    --bolt-glow: #00f5a088;
+    --saudi-green: #006c35;
+    --saudi-deep: #003f1f;
+    --night-top: #050a1f;
+    --night-mid: #0a1336;
+    --night-low: #1a1f4d;
+    --sand: #e6c89a;
+    --warn: #ff3a55;
+    --ink: #eafff5;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    background: #000;
+    color: var(--ink);
+    font-family: 'Rajdhani', system-ui, sans-serif;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  /* ===== Riyadh night sky ===== */
+  .sky {
+    position: fixed; inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 100%, #1a3a2a 0%, transparent 60%),
+      radial-gradient(ellipse 60% 40% at 80% 80%, var(--saudi-deep) 0%, transparent 70%),
+      linear-gradient(180deg, var(--night-top) 0%, var(--night-mid) 45%, var(--night-low) 75%, #2a1f1a 100%);
+    z-index: 0;
+  }
+  .stars {
+    position: fixed; inset: 0; z-index: 1;
+    background-image:
+      radial-gradient(1px 1px at 12% 18%, #fff 50%, transparent 100%),
+      radial-gradient(1px 1px at 28% 9%, #cfe 50%, transparent 100%),
+      radial-gradient(1.5px 1.5px at 46% 22%, #fff 50%, transparent 100%),
+      radial-gradient(1px 1px at 62% 12%, #fff 50%, transparent 100%),
+      radial-gradient(1px 1px at 78% 28%, #d4f5e0 50%, transparent 100%),
+      radial-gradient(1.5px 1.5px at 88% 14%, #fff 50%, transparent 100%),
+      radial-gradient(1px 1px at 22% 36%, #fff 50%, transparent 100%),
+      radial-gradient(1px 1px at 70% 6%, #fff 50%, transparent 100%),
+      radial-gradient(1px 1px at 6% 30%, #fff 50%, transparent 100%),
+      radial-gradient(1px 1px at 52% 4%, #fff 50%, transparent 100%);
+    opacity: .8;
+    animation: twinkle 4s ease-in-out infinite alternate;
+  }
+  @keyframes twinkle { 0% { opacity: .55 } 100% { opacity: .95 } }
+
+  /* Subtle dune in the deep distance */
+  .dune {
+    position: fixed; left: 0; right: 0; bottom: 0; height: 40vh; z-index: 2;
+    background:
+      radial-gradient(ellipse 70% 100% at 50% 100%, #2a1a10 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  /* ===== Skyline (Riyadh silhouette) ===== */
+  .skyline {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 3;
+    width: 100%; height: 38vh;
+    pointer-events: none;
+    filter: drop-shadow(0 -2px 20px rgba(0,245,160,.12));
+  }
+  .skyline svg { width: 100%; height: 100%; display: block; }
+
+  /* Window lights flicker subtly */
+  .skyline .window { fill: #ffd98a; opacity: .85; }
+  .skyline .window.dim { opacity: .35; }
+  .skyline .window.bolt { fill: var(--bolt); opacity: .9; }
+
+  /* ===== HUD ===== */
+  .stage {
+    position: relative;
+    z-index: 10;
+    height: 100vh;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+  }
+
+  header.hud {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 22px 36px;
+    gap: 24px;
+  }
+  .brand { display: flex; align-items: center; gap: 14px; }
+  .brand .logo {
+    width: 38px; height: 38px;
+    filter: drop-shadow(0 0 12px var(--bolt-glow));
+  }
+  .brand .title {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 900;
+    font-size: 18px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: #fff;
+  }
+  .brand .title span { color: var(--bolt); }
+  .brand .subtitle {
+    font-size: 11px; letter-spacing: 6px;
+    color: #9fd9bf; text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  .stats {
+    display: flex; gap: 18px;
+  }
+  .stat {
+    background: rgba(0,30,18,.55);
+    border: 1px solid rgba(0,245,160,.25);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    padding: 10px 18px;
+    min-width: 110px;
+    border-radius: 6px;
+    text-align: center;
+  }
+  .stat .label {
+    font-size: 10px; letter-spacing: 3px; text-transform: uppercase;
+    color: #7fc3a4;
+  }
+  .stat .value {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 700;
+    font-size: 22px;
+    color: var(--bolt);
+    text-shadow: 0 0 14px var(--bolt-glow);
+    margin-top: 2px;
+  }
+
+  /* ===== Center number arena ===== */
+  .arena {
+    display: grid; place-items: center;
+    position: relative;
+  }
+  .reticle {
+    position: absolute;
+    width: 460px; height: 460px;
+    border: 1px solid rgba(0,245,160,.18);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+  .reticle::before, .reticle::after {
+    content: ''; position: absolute; inset: 14%;
+    border: 1px dashed rgba(0,245,160,.12);
+    border-radius: 50%;
+  }
+  .reticle::after { inset: 28%; border-style: solid; opacity: .5; }
+
+  .number {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 900;
+    font-size: 180px;
+    line-height: 1;
+    text-shadow: 0 0 40px currentColor;
+    will-change: color;
+    white-space: nowrap;
+    color: #ffffff;
+    /* Stable total width — each slot below is fixed width, so the whole
+       number doesn't shift when digits change. */
+  }
+  .number .slot {
+    display: inline-block;
+    width: 0.7em;
+    text-align: center;
+    vertical-align: baseline;
+  }
+  .number .slot.dot { width: 0.5em; }
+  .number.pop { transform: scale(1.04); }
+
+  .prompt {
+    position: absolute;
+    bottom: 8%;
+    text-align: center;
+    width: 100%;
+    pointer-events: none;
+    transition: opacity .25s ease;
+  }
+  .prompt.hidden { opacity: 0; }
+  .prompt .key {
+    display: inline-block;
+    padding: 8px 22px;
+    border: 1.5px solid var(--bolt);
+    border-radius: 6px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 13px;
+    letter-spacing: 5px;
+    color: var(--bolt);
+    background: rgba(0,245,160,.06);
+    box-shadow: 0 0 26px rgba(0,245,160,.18);
+  }
+  .prompt .hint {
+    margin-top: 12px;
+    font-size: 13px;
+    letter-spacing: 3px;
+    color: #9fd9bf;
+    text-transform: uppercase;
+  }
+  .prompt .hint b { color: var(--bolt); }
+
+  /* ===== Toast feedback ===== */
+  .toast {
+    position: absolute;
+    top: 22%; left: 50%; transform: translateX(-50%) translateY(-10px);
+    padding: 14px 28px;
+    border-radius: 8px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 16px;
+    letter-spacing: 4px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .25s ease, transform .25s ease;
+    border: 1px solid;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .toast.hit  { color: var(--bolt); border-color: var(--bolt); background: rgba(0,245,160,.08); box-shadow: 0 0 30px var(--bolt-glow); }
+  .toast.miss { color: var(--warn); border-color: var(--warn); background: rgba(255,58,85,.08); box-shadow: 0 0 30px rgba(255,58,85,.3); }
+
+  /* ===== Footer ===== */
+  footer.foot {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 36px 22px;
+    font-size: 11px; letter-spacing: 3px;
+    color: #6fa48b;
+    text-transform: uppercase;
+  }
+  footer.foot .right { color: var(--bolt); opacity: .8; }
+
+  /* ===== Modal / start screen ===== */
+  .overlay {
+    position: fixed; inset: 0; z-index: 50;
+    background: radial-gradient(ellipse at center, rgba(5,10,31,.85) 0%, rgba(0,0,0,.95) 70%);
+    display: grid; place-items: center;
+    transition: opacity .35s ease;
+  }
+  .overlay.hidden { opacity: 0; pointer-events: none; }
+  .panel {
+    width: min(520px, 92vw);
+    text-align: center;
+    padding: 44px 36px;
+    background: linear-gradient(180deg, rgba(0,30,18,.5), rgba(0,10,8,.6));
+    border: 1px solid rgba(0,245,160,.3);
+    border-radius: 14px;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    box-shadow: 0 30px 80px rgba(0,0,0,.5), 0 0 60px rgba(0,245,160,.15) inset;
+  }
+  .panel .logo { width: 64px; height: 64px; filter: drop-shadow(0 0 20px var(--bolt-glow)); }
+  .panel h1 {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 900;
+    font-size: 30px;
+    letter-spacing: 6px;
+    margin: 14px 0 4px;
+    color: #fff;
+  }
+  .panel h1 span { color: var(--bolt); }
+  .panel p.tag {
+    font-size: 12px; letter-spacing: 5px;
+    color: #9fd9bf; text-transform: uppercase;
+    margin-bottom: 24px;
+  }
+  .panel .rules {
+    text-align: left;
+    margin: 0 0 24px;
+    padding: 16px 18px;
+    border-radius: 8px;
+    background: rgba(0,0,0,.35);
+    border: 1px solid rgba(0,245,160,.15);
+    font-size: 14px;
+    line-height: 1.7;
+    color: #cde8d9;
+  }
+  .panel .rules b { color: var(--bolt); font-weight: 700; }
+  .panel .rules .x { color: var(--warn); font-weight: 700; }
+  .btn {
+    display: inline-block;
+    padding: 14px 36px;
+    background: var(--bolt);
+    color: #002414;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 900;
+    letter-spacing: 4px;
+    font-size: 14px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    box-shadow: 0 0 30px var(--bolt-glow);
+    transition: transform .12s ease, box-shadow .12s ease;
+  }
+  .btn:hover { transform: translateY(-1px); box-shadow: 0 6px 36px var(--bolt-glow); }
+  .btn:active { transform: translateY(0); }
+  .panel .hint { margin-top: 14px; font-size: 11px; letter-spacing: 4px; color: #7fc3a4; text-transform: uppercase; }
+
+  /* ===== Result panel (post-round) ===== */
+  .result .big {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 900;
+    font-size: 56px;
+    color: var(--bolt);
+    text-shadow: 0 0 24px var(--bolt-glow);
+    letter-spacing: 2px;
+  }
+  .result .big.bad { color: var(--warn); text-shadow: 0 0 24px rgba(255,58,85,.4); }
+  .result .sub { font-size: 13px; letter-spacing: 4px; color: #9fd9bf; text-transform: uppercase; margin-top: 6px; }
+  .result .grade {
+    display: inline-block;
+    margin-top: 18px;
+    padding: 6px 18px;
+    border: 1px solid var(--bolt);
+    color: var(--bolt);
+    letter-spacing: 6px;
+    font-size: 12px;
+    border-radius: 4px;
+  }
+
+  @media (max-width: 720px) {
+    .number { font-size: 110px; }
+    .reticle { width: 280px; height: 280px; }
+    header.hud { padding: 16px 18px; flex-wrap: wrap; gap: 14px; }
+    .stats { width: 100%; justify-content: space-between; }
+    .stat { min-width: 0; flex: 1; padding: 8px 10px; }
+    .brand .title { font-size: 14px; letter-spacing: 3px; }
+    footer.foot { padding: 12px 18px 16px; font-size: 9px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Backdrop layers: Riyadh night -->
+<div class="sky"></div>
+<div class="stars"></div>
+<div class="dune"></div>
+
+<!-- Skyline silhouette: stylized Riyadh (Kingdom Tower, Al Faisaliah, Burj Rafal etc.) -->
+<div class="skyline" aria-hidden="true">
+<svg viewBox="0 0 1600 400" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bldg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0a1f14"/>
+      <stop offset="100%" stop-color="#020a06"/>
+    </linearGradient>
+    <linearGradient id="bldg2" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0d2a1a"/>
+      <stop offset="100%" stop-color="#03110a"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Back row -->
+  <g fill="url(#bldg2)" opacity=".85">
+    <rect x="0"   y="260" width="120" height="140"/>
+    <rect x="120" y="230" width="80"  height="170"/>
+    <rect x="200" y="270" width="60"  height="130"/>
+    <rect x="260" y="240" width="100" height="160"/>
+    <rect x="360" y="260" width="70"  height="140"/>
+    <rect x="430" y="220" width="90"  height="180"/>
+    <rect x="520" y="250" width="60"  height="150"/>
+    <rect x="580" y="230" width="110" height="170"/>
+    <rect x="690" y="250" width="80"  height="150"/>
+    <rect x="770" y="220" width="100" height="180"/>
+    <rect x="870" y="240" width="70"  height="160"/>
+    <rect x="940" y="220" width="120" height="180"/>
+    <rect x="1060" y="250" width="90" height="150"/>
+    <rect x="1150" y="230" width="80" height="170"/>
+    <rect x="1230" y="260" width="100" height="140"/>
+    <rect x="1330" y="240" width="80" height="160"/>
+    <rect x="1410" y="220" width="100" height="180"/>
+    <rect x="1510" y="250" width="90" height="150"/>
+  </g>
+
+  <!-- Front row + landmarks -->
+  <g fill="url(#bldg)">
+    <!-- Al Faisaliah (sphere-on-spire) -->
+    <polygon points="280,400 320,180 360,400"/>
+    <circle cx="320" cy="170" r="14"/>
+    <rect x="318" y="120" width="4" height="50"/>
+
+    <!-- Kingdom Tower (with characteristic top opening) -->
+    <path d="M 700 400 L 720 80 L 740 80 L 740 50 L 780 50 L 780 80 L 800 80 L 820 400 Z" />
+    <!-- top arch cutout -->
+    <path d="M 745 80 Q 760 130 775 80 L 775 110 Q 760 145 745 110 Z" fill="#020a06"/>
+
+    <!-- Burj Rafal-ish slim tower -->
+    <rect x="900" y="120" width="40" height="280"/>
+    <polygon points="900,120 920,90 940,120"/>
+
+    <!-- Mid generics -->
+    <rect x="0"   y="320" width="80"  height="80"/>
+    <rect x="80"  y="290" width="60"  height="110"/>
+    <rect x="140" y="310" width="70"  height="90"/>
+    <rect x="210" y="280" width="60"  height="120"/>
+
+    <rect x="380" y="300" width="80"  height="100"/>
+    <rect x="460" y="270" width="60"  height="130"/>
+    <rect x="520" y="290" width="80"  height="110"/>
+    <rect x="600" y="260" width="90"  height="140"/>
+
+    <rect x="840" y="280" width="60"  height="120"/>
+    <rect x="960" y="270" width="80"  height="130"/>
+    <rect x="1040" y="290" width="60" height="110"/>
+    <rect x="1100" y="250" width="90" height="150"/>
+    <rect x="1190" y="280" width="70" height="120"/>
+    <rect x="1260" y="300" width="80" height="100"/>
+
+    <!-- Right-side spire tower -->
+    <rect x="1350" y="180" width="40" height="220"/>
+    <polygon points="1340,180 1370,140 1400,180"/>
+
+    <rect x="1410" y="290" width="70" height="110"/>
+    <rect x="1480" y="270" width="60" height="130"/>
+    <rect x="1540" y="300" width="60" height="100"/>
+  </g>
+
+  <!-- Window lights -->
+  <g>
+    <!-- Kingdom Tower windows -->
+    <rect class="window dim" x="745" y="200" width="3" height="6"/>
+    <rect class="window"     x="752" y="200" width="3" height="6"/>
+    <rect class="window dim" x="759" y="200" width="3" height="6"/>
+    <rect class="window"     x="745" y="215" width="3" height="6"/>
+    <rect class="window"     x="752" y="215" width="3" height="6"/>
+    <rect class="window dim" x="759" y="215" width="3" height="6"/>
+    <rect class="window"     x="745" y="230" width="3" height="6"/>
+    <rect class="window dim" x="752" y="230" width="3" height="6"/>
+    <rect class="window"     x="759" y="230" width="3" height="6"/>
+    <rect class="window"     x="745" y="250" width="3" height="6"/>
+    <rect class="window dim" x="752" y="250" width="3" height="6"/>
+    <rect class="window"     x="759" y="250" width="3" height="6"/>
+    <rect class="window"     x="745" y="280" width="3" height="6"/>
+    <rect class="window"     x="752" y="280" width="3" height="6"/>
+    <rect class="window dim" x="759" y="280" width="3" height="6"/>
+    <rect class="window bolt" x="745" y="320" width="3" height="6"/>
+    <rect class="window"     x="752" y="320" width="3" height="6"/>
+    <rect class="window"     x="759" y="320" width="3" height="6"/>
+
+    <!-- Scattered windows across other buildings -->
+    <rect class="window" x="20"  y="340" width="3" height="5"/>
+    <rect class="window" x="40"  y="340" width="3" height="5"/>
+    <rect class="window dim" x="60"  y="340" width="3" height="5"/>
+    <rect class="window" x="100" y="320" width="3" height="5"/>
+    <rect class="window" x="120" y="320" width="3" height="5"/>
+    <rect class="window dim" x="180" y="340" width="3" height="5"/>
+    <rect class="window" x="240" y="310" width="3" height="5"/>
+    <rect class="window" x="410" y="320" width="3" height="5"/>
+    <rect class="window dim" x="440" y="320" width="3" height="5"/>
+    <rect class="window" x="480" y="290" width="3" height="5"/>
+    <rect class="window" x="540" y="310" width="3" height="5"/>
+    <rect class="window dim" x="620" y="290" width="3" height="5"/>
+    <rect class="window" x="650" y="290" width="3" height="5"/>
+    <rect class="window" x="860" y="310" width="3" height="5"/>
+    <rect class="window bolt" x="910" y="200" width="3" height="5"/>
+    <rect class="window" x="920" y="220" width="3" height="5"/>
+    <rect class="window" x="920" y="260" width="3" height="5"/>
+    <rect class="window dim" x="910" y="300" width="3" height="5"/>
+    <rect class="window" x="980" y="300" width="3" height="5"/>
+    <rect class="window" x="1120" y="290" width="3" height="5"/>
+    <rect class="window dim" x="1150" y="290" width="3" height="5"/>
+    <rect class="window" x="1210" y="310" width="3" height="5"/>
+    <rect class="window" x="1280" y="320" width="3" height="5"/>
+    <rect class="window bolt" x="1360" y="230" width="3" height="5"/>
+    <rect class="window" x="1370" y="250" width="3" height="5"/>
+    <rect class="window" x="1370" y="290" width="3" height="5"/>
+    <rect class="window dim" x="1360" y="330" width="3" height="5"/>
+    <rect class="window" x="1500" y="290" width="3" height="5"/>
+    <rect class="window" x="1560" y="320" width="3" height="5"/>
+  </g>
+</svg>
+</div>
+
+<!-- Reusable lightning-bolt SVG (inline so it can be styled / animated) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="bolt-icon" viewBox="0 0 686 928">
+    <path fill="#00f5a0" d="M 410 0 L 0 480 L 280 480 L 200 928 L 686 360 L 380 360 L 460 0 Z" />
+  </symbol>
+</svg>
+
+<!-- ===== Main stage ===== -->
+<div class="stage">
+  <header class="hud">
+    <div class="brand">
+      <svg class="logo" aria-hidden="true"><use href="#bolt-icon"/></svg>
+      <div>
+        <div class="title">Saudi <span>eLeague</span></div>
+        <div class="subtitle">Reaction Bolt · Riyadh</div>
+      </div>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="label">Round</div><div class="value" id="round-val">0/5</div></div>
+      <div class="stat"><div class="label">Best (ms)</div><div class="value" id="best-val">—</div></div>
+      <div class="stat"><div class="label">Avg (ms)</div><div class="value" id="avg-val">—</div></div>
+    </div>
+  </header>
+
+  <main class="arena" id="arena">
+    <div class="reticle"></div>
+    <div class="number" id="number"><span class="slot" id="seg-tens"></span><span class="slot" id="seg-ones">0</span><span class="slot dot">.</span><span class="slot" id="seg-deca">0</span><span class="slot" id="seg-centi">0</span></div>
+    <div class="toast" id="toast"></div>
+    <div class="prompt" id="prompt">
+      <div class="key">PRESS SPACE</div>
+      <div class="hint">only when the number turns <b>green</b></div>
+    </div>
+  </main>
+
+  <footer class="foot">
+    <div>RUH · 24.7136° N, 46.6753° E</div>
+    <div class="right">Powered by lightning ⚡</div>
+  </footer>
+</div>
+
+<!-- ===== Start / End overlay ===== -->
+<div class="overlay" id="overlay">
+  <div class="panel" id="panel">
+    <svg class="logo" aria-hidden="true"><use href="#bolt-icon"/></svg>
+    <h1>REACTION <span>BOLT</span></h1>
+    <p class="tag">Saudi eLeague Mini Challenge</p>
+    <div class="rules">
+      A stopwatch ticks up from <b>0.00</b>.<br>
+      At a random moment the display flashes <b>green</b> — hit <b>SPACE</b> the instant it does.<br>
+      <span class="x">Do NOT</span> press on any other color.<br>
+      Five rounds. Fastest reaction wins.
+    </div>
+    <button class="btn" id="start-btn">START</button>
+    <div class="hint">or press Space</div>
+  </div>
+</div>
+
+<script>
+(() => {
+  'use strict';
+
+  const TOTAL_ROUNDS = 5;
+  const BOLT_GREEN = '#00f5a0';
+  const DECOY_COLOR = '#ffffff';       // single, stable color for every non-target frame
+
+  // Stopwatch range. The counter runs from 0.00 and the green moment
+  // is randomized to land somewhere between MIN_MS and MAX_MS.
+  const TARGET_MIN_MS = 1500;          // earliest the green can appear
+  const TARGET_MAX_MS = 14000;         // latest the green can appear
+  const GREEN_WINDOW_MS = 280;         // how long the green stays on screen
+
+  const $number = document.getElementById('number');
+  const $segTens  = document.getElementById('seg-tens');
+  const $segOnes  = document.getElementById('seg-ones');
+  const $segDeca  = document.getElementById('seg-deca');
+  const $segCenti = document.getElementById('seg-centi');
+  const $toast = document.getElementById('toast');
+  const $prompt = document.getElementById('prompt');
+  const $roundVal = document.getElementById('round-val');
+  const $bestVal = document.getElementById('best-val');
+  const $avgVal = document.getElementById('avg-val');
+  const $overlay = document.getElementById('overlay');
+  const $panel = document.getElementById('panel');
+  const $startBtn = document.getElementById('start-btn');
+
+  let round = 0;
+  let times = [];
+  let state = 'idle';      // idle | running | target | resolved | done
+  let acceptingInput = false;
+  let rafId = null;
+  let roundStartAt = 0;
+  let targetMs = 0;
+
+  function rand(min, max) { return Math.random() * (max - min) + min; }
+  function randInt(min, max) { return Math.floor(rand(min, max + 1)); }
+  function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+  // Write a value (in ms elapsed) into the digit slots. Each slot is fixed-width
+  // so the layout never shifts as digits change.
+  function setNumberMs(ms) {
+    const hundredths = Math.floor(ms / 10);
+    const seconds = Math.floor(hundredths / 100);
+    const centi = hundredths % 100;
+    $segTens.textContent  = seconds >= 10 ? String(Math.floor(seconds / 10)) : '';
+    $segOnes.textContent  = String(seconds % 10);
+    $segDeca.textContent  = String(Math.floor(centi / 10));
+    $segCenti.textContent = String(centi % 10);
+  }
+
+  function setNumberColor(color) {
+    $number.style.color = color;
+    $number.style.textShadow = '0 0 40px ' + color;
+  }
+
+  function showToast(text, cls) {
+    $toast.textContent = text;
+    $toast.className = 'toast show ' + cls;
+    setTimeout(() => { $toast.classList.remove('show'); }, 1100);
+  }
+
+  function updateStats() {
+    $roundVal.textContent = `${Math.min(round, TOTAL_ROUNDS)}/${TOTAL_ROUNDS}`;
+    if (times.length) {
+      const best = Math.min(...times);
+      const avg = Math.round(times.reduce((a,b) => a+b, 0) / times.length);
+      $bestVal.textContent = best;
+      $avgVal.textContent = avg;
+    } else {
+      $bestVal.textContent = '—';
+      $avgVal.textContent = '—';
+    }
+  }
+
+  function clearTimers() {
+    if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+  }
+
+  // ---- Game loop ----
+  function startGame() {
+    round = 0;
+    times = [];
+    updateStats();
+    $overlay.classList.add('hidden');
+    $prompt.classList.add('hidden');   // hide the bottom hint once playing
+    nextRound();
+  }
+
+  function nextRound() {
+    round += 1;
+    updateStats();
+    if (round > TOTAL_ROUNDS) {
+      endGame();
+      return;
+    }
+    startRound();
+  }
+
+  function startRound() {
+    // Random fractional target somewhere in the range — e.g. 3.23 or 5.52.
+    targetMs = Math.floor(rand(TARGET_MIN_MS, TARGET_MAX_MS));
+    roundStartAt = performance.now();
+    state = 'running';
+    acceptingInput = true;
+    setNumberMs(0);
+    setNumberColor(DECOY_COLOR);
+    tick();
+  }
+
+  // Stopwatch loop — runs every animation frame so the .XX flickers fast.
+  function tick() {
+    if (state !== 'running' && state !== 'target') return;
+    const now = performance.now();
+    const elapsed = now - roundStartAt;
+
+    // Missed the green window entirely.
+    if (elapsed >= targetMs + GREEN_WINDOW_MS) {
+      state = 'resolved';
+      acceptingInput = false;
+      setNumberMs(targetMs);
+      setNumberColor('#ff3a55');
+      showToast('TOO SLOW', 'miss');
+      setTimeout(nextRound, 900);
+      return;
+    }
+
+    // Color: green inside the target window, single decoy color otherwise.
+    if (elapsed >= targetMs) {
+      if (state !== 'target') {
+        state = 'target';
+        setNumberColor(BOLT_GREEN);
+      }
+    }
+
+    setNumberMs(elapsed);
+    rafId = requestAnimationFrame(tick);
+  }
+
+  function handleSpace() {
+    if (!acceptingInput) return;
+
+    if (state === 'target') {
+      clearTimers();
+      acceptingInput = false;
+      const now = performance.now();
+      const elapsed = now - roundStartAt;
+      const dt = Math.round(elapsed - targetMs);
+      times.push(dt);
+      updateStats();
+      setNumberMs(elapsed);          // freeze on the value at moment of press
+      setNumberColor(BOLT_GREEN);
+      state = 'resolved';
+      showToast(`${dt} ms`, 'hit');
+      setTimeout(nextRound, 900);
+      return;
+    }
+
+    if (state === 'running') {
+      clearTimers();
+      acceptingInput = false;
+      state = 'resolved';
+      setNumberColor('#ff3a55');
+      showToast('FALSE START', 'miss');
+      setTimeout(nextRound, 900);
+    }
+  }
+
+  function endGame() {
+    state = 'done';
+    acceptingInput = false;
+    clearTimers();
+    // Leave the digit slots intact so a restart can write into them.
+    setNumberColor(BOLT_GREEN);
+
+    const best = times.length ? Math.min(...times) : null;
+    const avg = times.length ? Math.round(times.reduce((a,b)=>a+b,0)/times.length) : null;
+
+    let grade = '—';
+    if (best !== null) {
+      if (best < 180) grade = 'S · LIGHTNING';
+      else if (best < 230) grade = 'A · ELITE';
+      else if (best < 290) grade = 'B · SHARP';
+      else if (best < 360) grade = 'C · STEADY';
+      else grade = 'D · WARM-UP';
+    }
+
+    const failed = best === null;
+
+    $panel.classList.add('result');
+    $panel.innerHTML = `
+      <svg class="logo" aria-hidden="true"><use href="#bolt-icon"/></svg>
+      <h1>ROUND <span>COMPLETE</span></h1>
+      <p class="tag">Saudi eLeague · Reaction Bolt</p>
+      <div class="big ${failed ? 'bad' : ''}">${failed ? 'NO TIME' : best + ' ms'}</div>
+      <div class="sub">Best Reaction</div>
+      ${failed ? '' : `<div class="sub" style="margin-top:14px">Avg ${avg} ms · ${times.length}/${TOTAL_ROUNDS} hits</div>`}
+      ${failed ? '' : `<div class="grade">${grade}</div>`}
+      <div style="margin-top:28px"><button class="btn" id="restart-btn">PLAY AGAIN</button></div>
+      <div class="hint">or press Space</div>
+    `;
+    $overlay.classList.remove('hidden');
+    document.getElementById('restart-btn').addEventListener('click', () => {
+      // reset panel HTML to start state on next overlay show — easier to just restart immediately
+      startGame();
+    });
+  }
+
+  // ---- Input ----
+  document.addEventListener('keydown', (e) => {
+    if (e.code !== 'Space' && e.key !== ' ') return;
+    e.preventDefault();
+    if (e.repeat) return;
+
+    if (state === 'idle' || state === 'done') {
+      // start or restart from overlay
+      if (state === 'done') {
+        // restart cleanly — rebuild start panel quickly
+        startGame();
+      } else {
+        startGame();
+      }
+      return;
+    }
+    handleSpace();
+  });
+
+  $startBtn.addEventListener('click', startGame);
+
+  // Initial stats
+  updateStats();
+})();
+</script>
+</body>
+</html>
